@@ -3,8 +3,22 @@
 #include <string.h>
 #include <signal.h>
 #include "..\..\hiredis.h"
+
+extern "C" 
+{
 #include "..\..\async.h"
 #include "..\..\adapters\ae.h"
+}
+
+#define _WINSOCKAPI_
+ #include <windows.h>
+ #include <WinSock2.h>
+ #include <ws2tcpip.h>
+#include <mswsock.h>
+ //#define ASIO_STANDALONE
+//#define ASIO_WINDOWS_RUNTIME
+ //#include "asio.hpp"
+#pragma comment(lib,"ws2_32.lib")
 
 /* Put event loop in the global scope, so it can be explicitly stopped */
 static aeEventLoop *loop;
@@ -32,46 +46,46 @@ void SyncSample() {
     }
 
     /* PING server */
-    reply = redisCommand(c, "PING");
+    reply = (redisReply*)redisCommand(c, "PING");
     printf("PING: %s\n", reply->str);
     freeReplyObject(reply);
 
     /* Set a key */
-    reply = redisCommand(c, "SET %s %s", "foo", "Hello World Sync");
+    reply = (redisReply*)redisCommand(c, "SET %s %s", "foo", "Hello World Sync");
     printf("SET: %s\n", reply->str);
     freeReplyObject(reply);
 
     /* Set a key using binary safe API */
-    reply = redisCommand(c, "SET %b %b", "bar", (size_t) 3, "Hello", (size_t) 5);
+    reply = (redisReply*)redisCommand(c, "SET %b %b", "bar", (size_t) 3, "Hello", (size_t) 5);
     printf("SET (binary API): %s\n", reply->str);
     freeReplyObject(reply);
 
     /* Try a GET and two INCR */
-    reply = redisCommand(c, "GET foo");
+    reply = (redisReply*)redisCommand(c, "GET foo");
     printf("GET foo: %s\n", reply->str);
     freeReplyObject(reply);
 
-    reply = redisCommand(c, "INCR counter");
+    reply = (redisReply*)redisCommand(c, "INCR counter");
     printf("INCR counter: %lld\n", reply->integer);
     freeReplyObject(reply);
     /* again ... */
-    reply = redisCommand(c, "INCR counter");
+    reply = (redisReply*)redisCommand(c, "INCR counter");
     printf("INCR counter: %lld\n", reply->integer);
     freeReplyObject(reply);
 
     /* Create a list of numbers, from 0 to 9 */
-    reply = redisCommand(c, "DEL mylist");
+    reply = (redisReply*)redisCommand(c, "DEL mylist");
     freeReplyObject(reply);
     for (j = 0; j < 10; j++) {
         char buf[64];
 
         _snprintf(buf, 64, "%d", j);
-        reply = redisCommand(c, "LPUSH mylist element-%s", buf);
+        reply = (redisReply*)redisCommand(c, "LPUSH mylist element-%s", buf);
         freeReplyObject(reply);
     }
 
     /* Let's check what we have inside the list */
-    reply = redisCommand(c, "LRANGE mylist 0 -1");
+    reply = (redisReply*)redisCommand(c, "LRANGE mylist 0 -1");
     if (reply->type == REDIS_REPLY_ARRAY) {
         for (j = 0; j < reply->elements; j++) {
             printf("%u) %s\n", j, reply->element[j]->str);
@@ -91,7 +105,7 @@ void SyncSample() {
 
 static int getCallbackCalls = 0;
 void getCallbackContinue(redisAsyncContext *c, void *r, void *privdata) {
-    redisReply *reply = r;
+    redisReply *reply = (redisReply*)r;
     if (reply == NULL)
         return;
 
@@ -160,7 +174,7 @@ void AsyncSample() {
 /* ------------------------------------------------------------------------- */
 
 void PubSubCallback(redisAsyncContext *c, void *r, void *privdata) {
-    redisReply *reply = r;
+    redisReply *reply = (redisReply*)r;
     if (reply == NULL) return;
 
     if (reply->type == REDIS_REPLY_ARRAY) {
@@ -217,6 +231,11 @@ int main(int argc, char **argv) {
     SyncSample();
     AsyncSample();
     PubSubSample();
+// 	asio::io_service io_service;
+// 	asio::ip::tcp::socket socket1(io_service);
+// 	asio::ip::tcp::acceptor acceptor_(io_service, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), 3333), false);
+	auto ss = socket(0,0,0);
+	connect(ss, 0, 0);
     return 0;
 }
 

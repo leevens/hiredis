@@ -1,0 +1,15 @@
+;LIBRARY
+EXPORTS
+freeReplyObject
+redisConnect
+redisFree
+redisCommandArgv
+redisCommand
+redisAsyncConnect
+redisAsyncSetConnectCallback
+redisAsyncSetDisconnectCallback
+redisAsyncDisconnect
+redisAsyncFree
+redisAsyncHandleRead
+redisAsyncHandleWrite
+redisAsyncCommand

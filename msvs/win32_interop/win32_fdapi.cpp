@@ -40,33 +40,41 @@ using namespace std;
 
 extern "C" {
 // Unix compatible FD based routines
+
+
+
+#if !defined(_WIN64) || 1
+	fdapi_getsockopt getsockopt = NULL;
+	fdapi_setsockopt setsockopt = NULL;
+	fdapi_bind bind = NULL;
+	fdapi_listen listen = NULL;
+	fdapi_getpeername getpeername = NULL;
+	fdapi_getsockname getsockname = NULL;
+	fdapi_htonl htonl = NULL;
+	fdapi_htons htons = NULL;
+	fdapi_ntohl ntohl = NULL;
+	fdapi_ntohs ntohs = NULL;
+#endif
+
 fdapi_accept accept = NULL;
 fdapi_access access = NULL;
-fdapi_bind bind = NULL;
 fdapi_connect connect = NULL;
 fdapi_fcntl fcntl = NULL;
 fdapi_fsync fsync = NULL;
 fdapi_ftruncate ftruncate = NULL;
 fdapi_freeaddrinfo freeaddrinfo = NULL;
 fdapi_getaddrinfo getaddrinfo = NULL;
-fdapi_getpeername getpeername = NULL;
-fdapi_getsockname getsockname = NULL;
-fdapi_getsockopt getsockopt = NULL;
-fdapi_htonl htonl = NULL;
-fdapi_htons htons = NULL;
+
 fdapi_isatty isatty = NULL;
 fdapi_inet_ntop inet_ntop = NULL;
 fdapi_inet_pton inet_pton = NULL;
-fdapi_listen listen = NULL;
 fdapi_lseek64 lseek64 = NULL;
-fdapi_ntohl ntohl = NULL;
-fdapi_ntohs ntohs = NULL;
 fdapi_open open = NULL;
 fdapi_pipe pipe = NULL;
 fdapi_poll poll = NULL;
 fdapi_read read = NULL;
 fdapi_select select = NULL;
-fdapi_setsockopt setsockopt = NULL;
+
 fdapi_socket socket = NULL;
 fdapi_write write = NULL;
 }
@@ -1134,10 +1142,11 @@ int InitWinsock() {
     iError = f_WSAStartup(wVers, &t_wsa);
 
     if (iError != NO_ERROR || LOBYTE(t_wsa.wVersion) != 2 || HIBYTE(t_wsa.wVersion) != 2) {
-        exit(1);
+       // exit(1);
     } else {
         return 0;
     }
+	return 0;
 }
 
 int CleanupWinsock() {
@@ -1153,35 +1162,47 @@ public:
 
 private:
     Win32_FDSockMap() {
+		printf("Win32_FDSockMap init\n");
         InitWinsock();
 
-        accept = FDAPI_accept;
+
+
+
+
+#if !defined(_WIN64)|| 1
+		setsockopt = FDAPI_setsockopt;
+		getsockopt = FDAPI_getsockopt;
+		bind = FDAPI_bind;
+
+		getpeername = FDAPI_getpeername;
+		getsockname = FDAPI_getsockname;
+		htonl = FDAPI_htonl;
+		htons = FDAPI_htons;
+		ntohl = FDAPI_ntohl;
+		ntohs = FDAPI_ntohs;
+		listen = FDAPI_listen;
+#endif
+
+		accept = FDAPI_accept;
         access = FDAPI_access;
-        bind = FDAPI_bind;
+        
         connect = FDAPI_connect;
         fcntl = FDAPI_fcntl;
         freeaddrinfo = FDAPI_freeaddrinfo;
         fsync = FDAPI_fsync;
         ftruncate = FDAPI_ftruncate;
         getaddrinfo = FDAPI_getaddrinfo;
-        getsockopt = FDAPI_getsockopt;
-        getpeername = FDAPI_getpeername;
-        getsockname = FDAPI_getsockname;
-        htonl = FDAPI_htonl;
-        htons = FDAPI_htons;
+
         inet_ntop = FDAPI_inet_ntop;
         inet_pton = FDAPI_inet_pton;
         isatty = FDAPI_isatty;
-        listen = FDAPI_listen;
         lseek64 = FDAPI_lseek64;
-        ntohl = FDAPI_ntohl;
-        ntohs = FDAPI_ntohs;
         open = FDAPI_open;
         pipe = FDAPI_pipe;
         poll = FDAPI_poll;
         read = FDAPI_read;
         select = FDAPI_select;
-        setsockopt = FDAPI_setsockopt;
+
         socket = FDAPI_socket;
         write = FDAPI_write;
     }
