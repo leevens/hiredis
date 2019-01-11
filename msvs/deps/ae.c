@@ -47,8 +47,10 @@
 #include <errno.h>
 
 #include "ae.h"
-#include "zmalloc.h"
-
+//#include "zmalloc.h"
+#define  zmalloc malloc
+#define  zfree  free
+#define zrealloc realloc
 /* Include the best multiplexing layer supported by this system.
  * The following should be ordered by performances, descending. */
 #ifdef _WIN32
