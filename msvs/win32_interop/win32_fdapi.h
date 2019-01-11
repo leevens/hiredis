@@ -152,21 +152,16 @@ extern "C"
 #endif
 
 // API replacements
-#if !defined(_WIN64) || 1
-extern fdapi_getsockopt     getsockopt;
-extern fdapi_setsockopt     setsockopt;
-extern fdapi_bind           bind;
-#endif
 extern fdapi_accept         accept;
 extern fdapi_access         access;
-
+extern fdapi_bind           bind;
 extern fdapi_connect        connect;
 extern fdapi_fcntl          fcntl;
 extern fdapi_freeaddrinfo   freeaddrinfo;
 extern fdapi_fsync          fsync;
 extern fdapi_ftruncate      ftruncate;
 extern fdapi_getaddrinfo    getaddrinfo;
-
+extern fdapi_getsockopt     getsockopt;
 extern fdapi_getpeername    getpeername;
 extern fdapi_getsockname    getsockname;
 extern fdapi_htonl          htonl;
@@ -183,7 +178,7 @@ extern fdapi_pipe           pipe;
 extern fdapi_poll           poll;
 extern fdapi_read           read;
 extern fdapi_select         select;
-
+extern fdapi_setsockopt     setsockopt;
 extern fdapi_socket         socket;
 extern fdapi_write          write;
 
